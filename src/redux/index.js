@@ -4,8 +4,9 @@ const createStore = (reducer, initialState) => { //Base de Redux
     let updater = () => { };
     const getState = () => state;
 
-    const dispatch = (action) => {
+    const dispatch = action => {
         state = reducer(state, action);
+        console.log("🚀 ~ file: index.js ~ line 9 ~ dispatch ~ state", state)
         updater();
     };
     const subscribe = (listener) => {

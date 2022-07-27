@@ -2,9 +2,9 @@ import { Component, createElement } from "../lib/react/index.js";
 import styled from "../lib/styled-components.js";
 import Wrapper from "./wrapper.js";
 import Movie from "./movie.js";
-import movies from "../movies.js"
 import store from "../store.js";
 import api from "../api.js"
+import { ADD_MOVIES } from "../actions/index.js";
 
 {/* <div class="wrapper">
     <section class="movie-list" id="container">
@@ -35,18 +35,43 @@ const MovieListStyled = styled.section`
 `
 
 class MovieList extends Component {
-    // state = {
-    //     movies: store.getState().movieList
-    // }
-    async componentDidMount() {
-        const page10 = await api.moviePage(10);
-        console.log("🚀 ~ file: movie-list.js ~ line 43 ~ MovieList ~ componentDidMount ~ page10", page10)
+    state = {
+        page: 1
+    }
+    getPage = async page => {
+        const { results } = await api.moviePage(page);
+        store.dispatch({
+            type: ADD_MOVIES,
+            payload: results
+        })
+    }
+
+    handleIntersection = (entries) => {
+        if (entries[0].isIntersecting) {
+            this.getPage(this.state.page);
+            this.setState({
+                page: this.state.page + 1
+            })
+        }
+        // console.log(entries);
+    }
+
+    componentDidMount() {
+        // this.getPage(this.state.page);
+        store.subscribe(() => {
+            this.setState();
+        })
+
+        // Ha IntersectionObserver se le pasa un callback y objeto de configuration
+        const observer = new IntersectionObserver(this.handleIntersection)
+        observer.observe(window.intersector);
+        // debugger
     }
     render() {
         const state = store.getState();
         const movieListId = state.list[state.filter]
         const movieList = state.movieList; // {1=>{}, 2=>{}, 3=>{}}
-        console.log(state)
+
         return Wrapper({
             children: MovieListStyled({
                 // Aqui retorna la instancia new Movie() enviando como parámetro
